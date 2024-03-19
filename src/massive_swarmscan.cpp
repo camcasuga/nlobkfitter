@@ -66,9 +66,9 @@ int main( int argc, char* argv[] )
     nlodis_config::USE_MASSES = true;
 
 //     nlodis_config::CUBA_EPSREL = 10e-3;
-    nlodis_config::CUBA_EPSREL = 1e-4; // highacc def1
+    nlodis_config::CUBA_EPSREL = 10e-3; //1e-4; // highacc def1
 //     nlodis_config::CUBA_MAXEVAL= 2e7;
-    nlodis_config::CUBA_MAXEVAL= 5e8; // highacc def1
+    nlodis_config::CUBA_MAXEVAL= 1e7; //5e8; // highacc def1
     nlodis_config::MINR = 1e-6;
     nlodis_config::MAXR = 30;
     nlodis_config::PRINTDATA = true;
