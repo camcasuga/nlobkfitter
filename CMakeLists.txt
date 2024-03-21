@@ -13,6 +13,8 @@ get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 git_describe(GIT_DESCRIBE)
 git_local_changes(GIT_LOCAL_CHANGES)
 
+find_package(GSL REQUIRED)
+
 find_package(OpenMP)
 if (OPENMP_FOUND)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -22,11 +24,14 @@ endif()
 
 # Headers and libraries for AmplitudeLib v2
 # and Minuit and Cuba (if not available on system)
-link_directories("../amplitudelib_v2/build/lib/")
+link_directories("amplitudelib/build/lib/")
 link_directories("../libs/lib/")
-include_directories("../amplitudelib_v2/")
+link_directories("Minuit2/lib/")
+link_directories("cuba/lib")
+include_directories("amplitudelib/")
 include_directories("../libs/include")
-
+include_directories("Minuit2/include")
+include_directories("cuba/include")
 add_subdirectory(src)
 
 set_target_properties(nlofit PROPERTIES
