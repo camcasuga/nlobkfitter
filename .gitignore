@@ -2,8 +2,8 @@
 Makefile.*
 *.cstm
 
-# Ignore run files
-*.sh
+# Ignore old run files
+run-scripts/
 # Whitelist run script folder
 !run-scripts/*
 !run-scripts/echo_inputs/*
