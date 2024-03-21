@@ -25,6 +25,11 @@ lightqfitex
 lofit
 fltool
 
+# Ignore other packages
+cuba/
+amplitduelib/
+Minuit2/
+
 # Editor and other files
 .vscode/
 doc/
