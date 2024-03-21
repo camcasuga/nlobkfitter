@@ -630,6 +630,7 @@ double NLODISFitter::operator()(const std::vector<double>& par) const
     // comparing to old sigma02
     double old_chisq_over_n = minimiser_helper_chisqr_vec(old_sigma02, datavals, dataerrs, thdata);
     // Output for plotting
+    cout << " ## var_xbj, var_qsqr, var_y, sigmar, sigmar_err, sigma02xthdata " << endl;
     if(nlodis_config::PRINTDATA){
         for(int i=0; i<var_xbj.size(); i++){
         #pragma omp critical
@@ -638,17 +639,18 @@ double NLODISFitter::operator()(const std::vector<double>& par) const
                 << setw(10) << var_y[i]        << " "
                 << setw(10) << datavals[i]     << " "
                 << setw(10) << dataerrs[i]     << " "
-                << setw(10) << sigma02*thdata[i] /* << " "
+                << setw(10) << old_sigma02*thdata[i] /* << " "
                 << setw(10) << sigma02*theory_charm <<*/ 
                 << endl;
             }
     }
-    cout    << endl 
-            << "# Calculated chi^2/N = " << chisqr_over_n
-            << " (N=" << points
-            << "), parameters (" << PrintVector(par)
-            << ", sigma02=" << sigma02
-            << ")" << endl<<endl;
+    cout << " ## sigma r data ends here " << endl;    
+    // cout    << endl 
+    //         << "# Calculated chi^2/N = " << chisqr_over_n
+    //         << " (N=" << points
+    //         << "), parameters (" << PrintVector(par)
+    //         << ", sigma02=" << sigma02
+    //         << ")" << endl<<endl;
     cout    << endl
             << "# Calculated chi^2/N = " << old_chisq_over_n
             << " (N=" << points
