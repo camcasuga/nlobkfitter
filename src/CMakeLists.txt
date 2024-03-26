@@ -3,6 +3,7 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/gitsha1.cpp.in" "${CMAKE_CURRENT_BIN
 add_executable(
 	plottool
 	tool_plot.cpp
+	massive_swarmscan.cpp
 	dipole.cpp
 	data.cpp
 	solver.cpp
