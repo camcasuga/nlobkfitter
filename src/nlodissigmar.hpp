@@ -344,7 +344,7 @@ public:
     };
 
     double Xrpdty_LO_projectileY(double x, double Qsq, double rsq);
-    double Xrpdty_LO_projectileY_max(double x, double Qsqr, double ){return x*icQ0sqr/Qsqr; }    
+    double Xrpdty_LO_projectileY_max(double x, double Qsqr, double ){return x*icQ0sqr/Qsqr; } /// x0 = 1   
     double Xrpdty_LO_targetETA(double x, double Qsq, double rsq);
 
     double Xrpdty_NLO_projectileY(double Qsq, double z2, double z2min, double icX0, double x01sq, double x02sq, double x21sq );
