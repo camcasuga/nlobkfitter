@@ -20,8 +20,8 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/gitsha1.cpp.in" "${CMAKE_CURRENT_BIN
 add_executable(
 	nlofit	
 	#main.cpp
-	#massive_swarmscan.cpp
-	tool_plot.cpp
+	massive_swarmscan.cpp
+	#tool_plot.cpp
 	dipole.cpp
 	data.cpp
 	solver.cpp
