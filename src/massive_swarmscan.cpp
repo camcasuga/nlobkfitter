@@ -20,7 +20,7 @@
 
 #include "data.hpp"
 #include "nlodissigmar.hpp"
-#include "modul.hpp"
+#include "nlodis_config.hpp"
 
 #include <Minuit2/FunctionMinimum.h>
 #include <Minuit2/MnUserParameterState.h>
