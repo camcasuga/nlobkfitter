@@ -15,5 +15,5 @@ export LIBRARY_PATH=${LIBRARY_PATH}:/users/caaucasu/nlobkfitter/Minuit2/lib
 module add cmake/3.23.1
 module add gsl
 
-OMP_NUM_THREADS=12 CUBACORES=0 ./build/bin/nlofit unlpc resumbk balsdrc z2imp unb ${1} ${2} ${4} 1.0 1.0 1 1 0 0 ${3} 1.42 4.83 | tee ./sigmars_nlo1/${5}.dat
+OMP_NUM_THREADS=12 CUBACORES=0 ./build/bin/nlofit uncc resumbk balsdrc z2imp unb ${1} ${2} ${4} 1.0 1.0 1 1 0 0 ${3} 1.42 4.83 | tee ./sigmars_nlo1/${5}.dat
 
