@@ -111,6 +111,8 @@ namespace config
     extern KINEMATICAL_CONSTRAINTS KINEMATICAL_CONSTRAINT; // Solve nonlocal kinematically constrained BK (LO part)
     
     extern bool EULER_METHOD;    // Use Euler method instead of Runge Kutta, must be true if KINEMATICA_CONSTRAINT is used
+
+    const bool LOG_INTERPOLATOR = true; // Flag to determine if interpolate the dipole in log(r), log(N) 
     
 }
 std::string NLOBK_CONFIG_STRING();

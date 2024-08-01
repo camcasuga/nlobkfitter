@@ -22,11 +22,13 @@
 #include <gsl/gsl_errno.h>
 
 // Integration constants
-const double eps = 1e-40;
+const double eps = 1e-30;
 using namespace config;
 //using std::isinf;
 //using std::isnan;
 using std::abs;
+
+
 
 BKSolver::BKSolver(Dipole* d)
 {
@@ -85,7 +87,11 @@ int BKSolver::Solve(double maxy)
     
     const gsl_odeiv_step_type * T = gsl_odeiv_step_rk2; // rkf45 is more accurate
     gsl_odeiv_step * s    = gsl_odeiv_step_alloc (T, vecsize);
-    gsl_odeiv_control * c = gsl_odeiv_control_y_new (0.00001, INTACCURACY);    //abserr relerr   // paper: 0.0001
+    gsl_odeiv_control * c = gsl_odeiv_control_y_new (0.00001, 1e-5);    //abserr relerr  
+    // Note: absolute uncertainty tolerance here is quite large for the small-r region, but it is in practice needed
+    // if the initial condition has a large anomalous dimension: in that case there seems to be quite a fast evolution
+    // especially in the region where the dipole is approx. 0
+    // Use should check that final results are not sensitive to this parameter!
     gsl_odeiv_evolve * e  = gsl_odeiv_evolve_alloc (vecsize);
     double h = step;  // Initial ODE solver step size
     
@@ -184,14 +190,13 @@ int Evolve(double y, const double amplitude[], double dydt[], void *params)
         if (s>1 and config::FORCE_POSITIVE_N) s=1.0;
         yvals_s.push_back(s);
     }
-    // mitä jos setmax ja freezaa evoluutio isoilla dipoleilla?
     
 #pragma omp parallel for schedule(dynamic)
     for (unsigned int i=0; i< dipole->RPoints(); i+=1)
     {
         // It seems to be much more efficeint to initialize interpolators locally
         // for each thread
-        Interpolator interp(rvals,nvals);
+        Interpolator interp(rvals,nvals,LOG_INTERPOLATOR);
         interp.Initialize();
         interp.SetFreeze(true);
         interp.SetUnderflow(0);
@@ -202,18 +207,19 @@ int Evolve(double y, const double amplitude[], double dydt[], void *params)
         
         //if (dipole->RVal(i) < 0.001)
         //    continue;
-        /*        if (amplitude[i] > 0.99999)
+        // Freeze evolution deep in the saturation region where we know that nothing hapens
+        if (amplitude[i] > 0.99999)
          {
-         dydt[i]=0;
-         continue;
+             dydt[i]=0;
+            continue;
          }
-         */
+         
         double lo = par->solver->RapidityDerivative_lo(dipole->RVal(i), &interp, y);
         
         double nlo=0;
         if (!NO_K2)
         {
-            Interpolator interp_s(rvals,yvals_s);
+            Interpolator interp_s(rvals,yvals_s, LOG_INTERPOLATOR);
             interp_s.Initialize();
             interp_s.SetFreeze(true);
             interp_s.SetUnderflow(1.0);
@@ -558,11 +564,13 @@ double BKSolver::Kernel_lo(double r, double z, double theta)
     
     double eps = 1e-50;
     
+    // Note: we have previously checked that X and Y are not zero
+
     // Fixed as or Balitsky
     // Note: in the limit alphas(r)=const Balitsky -> Fixed coupling as
     if (RC_LO == FIXED_LO )
     {
-        result =NC/(2.0*SQR(M_PI))*config::FIXED_AS * SQR(r / (X*Y+ eps) );
+        result =NC/(2.0*SQR(M_PI))*config::FIXED_AS * SQR(r / (X*Y) );
         alphas_scale=r;
     }
     else if (RC_LO == BALITSKY_LO  )
@@ -572,7 +580,7 @@ double BKSolver::Kernel_lo(double r, double z, double theta)
         result =
         NC/(2.0*SQR(M_PI))*Alphas(r)
         * (
-           SQR(r) / ( SQR(X+eps) * SQR(Y+eps)  )
+           SQR(r) / ( SQR(X) * SQR(Y)  )
            + 1.0/SQR(Y)*(alphas_y/alphas_x - 1.0)
            + 1.0/SQR(X)*(alphas_x/alphas_y - 1.0)
            );
@@ -580,12 +588,12 @@ double BKSolver::Kernel_lo(double r, double z, double theta)
     }
     else if (RC_LO == SMALLEST_LO)
     {
-        result = NC*Alphas(min) / (2.0*SQR(M_PI))*SQR(r/(X*Y+eps));
+        result = NC*Alphas(min) / (2.0*SQR(M_PI))*SQR(r/(X*Y));
         alphas_scale = min;
     }
     else if (RC_LO == PARENT_LO)
     {
-        result = NC*Alphas(r) / (2.0*SQR(M_PI)) * SQR(r/(X*Y+eps));
+        result = NC*Alphas(r) / (2.0*SQR(M_PI)) * SQR(r/(X*Y));
         alphas_scale = r;
     }
     else if (RC_LO == FRAC_LO)
@@ -603,8 +611,8 @@ double BKSolver::Kernel_lo(double r, double z, double theta)
     else if (RC_LO == GUILLAUME_LO)
     {
         // 1708.06557 Eq. 169
-        double r_eff_sqr = r*r * std::pow( Y*Y / (X*X+eps), (X*X-Y*Y)/(r*r) );
-        result = NC*Alphas(std::sqrt(r_eff_sqr)) / (2.0*SQR(M_PI)) * SQR(r/(X*Y + eps));
+        double r_eff_sqr = r*r * std::pow( Y*Y / (X*X), (X*X-Y*Y)/(r*r) );
+        result = NC*Alphas(std::sqrt(r_eff_sqr)) / (2.0*SQR(M_PI)) * SQR(r/(X*Y ));
         alphas_scale = std::sqrt(r_eff_sqr);
         
     }
@@ -719,7 +727,7 @@ double BKSolver::Kernel_lo(double r, double z, double theta)
         return resum*singlelog_resum*result;
     }
     
-    double lo_kernel = Alphas(alphas_scale)*NC/(2.0*M_PI*M_PI) * SQR( r / (X*Y+eps)); // lo kernel with parent/smallest dipole
+    double lo_kernel = Alphas(alphas_scale)*NC/(2.0*M_PI*M_PI) * SQR( r / (X*Y)); // lo kernel with parent/smallest dipole
     double subtract = 0;
     if (config::RESUM_RC != RESUM_RC_BALITSKY)
         subtract = lo_kernel * singlelog_resum_expansion;
