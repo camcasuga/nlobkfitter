@@ -64,7 +64,7 @@ int Dipole::InitializeInterpolation(int yind)
         delete dipole_interp;
     }
 
-    dipole_interp = new Interpolator(rvals, amplitude[yind]);
+    dipole_interp = new Interpolator(rvals, amplitude[yind],LOG_INTERPOLATOR);
     dipole_interp->SetUnderflow(0);
     dipole_interp->SetOverflow(1.0);
     dipole_interp->SetFreeze(true);
@@ -159,6 +159,7 @@ double Dipole::InterpolateN(double r, double y)
     
     // Now we know that yind and yind+1 are acceptable indeces, so we can interpolate in rapidity linearly
     // Construct interpolators in r at both rapidities
+    /*
     std::vector<double> rvals_lower;
     std::vector<double> rvals_upper;
     std::vector<double> nvals_lower;
@@ -191,7 +192,9 @@ double Dipole::InterpolateN(double r, double y)
     if (result > 1.0) return 1.0;
     if (result < 0) return 0;
     
+    
     return result;
+    */
 }
 
 /*

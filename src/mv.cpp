@@ -57,13 +57,11 @@ cout << r<< " " << res << endl;
 	if (r < 1e-30)
 		return 0;
 	const double e = 2.7182818;
-	///TODO: some algorithm to determina small r, e.g. when one has to linearize
-    if (r < 2e-6)   ///NOTE: factor 1/4 "correctly", not as in AAMS paper
-            return std::pow(SQR(r)*qs0sqr, anomalous_dimension)/4.0
-            * std::log( 1.0/(r*lambdaqcd) + ec*e) ;
-    return 1.0 - std::exp(-std::pow(SQR(r)*qs0sqr, anomalous_dimension)/4.0
-            * std::log( 1.0/(r*lambdaqcd) + ec*e) );
-}
+	double exponent = std::pow(SQR(r)*qs0sqr, anomalous_dimension)/4.0
+		* std::log( 1.0/(r*lambdaqcd) + ec*e);
+	if (exponent < 1e-5) return exponent;
+	else return 1.0 - std::exp(-exponent);
+
 
 
 void MV::SetQsqr(double qsqr)
