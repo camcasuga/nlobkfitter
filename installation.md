@@ -23,4 +23,4 @@
        - make && make install
     5. build nlobkfitter & tools:
        - clone https://github.com/hejajama/nlobkfitter
-       - make or cmake
+       - cd build && make

@@ -3206,7 +3206,7 @@ int integrand_ITqgunsub_massive_I3(const int *ndim, const double x[], const int 
     double y_u2 = x[8]; // not used in fast
     double x01sq=Sq(x01);
     double x02sq=Sq(x02);
-    double x21sq=x01sq+x02sq-2.0*sqrt(x01sq*x02sq)*cos(phix0102);
+    double x21sq=std::max(0.0, x01sq+x02sq-2.0*sqrt(x01sq*x02sq)*cos(phix0102));
     double jac=(1.0-z2min)*(1.0-z1-z2min);
     double Xrpdt= Optr->Xrpdty_NLO(Q*Q, z2, z2min, X0, x01sq, x02sq, x21sq); //z2min * X0/z2;
 

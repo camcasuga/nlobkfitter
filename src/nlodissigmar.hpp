@@ -255,7 +255,7 @@ public:
         else {
             // Not using Target Rapidity -> no shifts / change of variables to eta
             x_lo_y_eta_rap_ptr = &ComputeSigmaR::Xrpdty_LO_projectileY;
-            x_dip_y_eta_rap_ptr = &ComputeSigmaR::Xrpdty_LO_projectileY_max;
+            x_dip_y_eta_rap_ptr = &ComputeSigmaR::Xrpdty_LO_projectileY;
             x_nlo_fun_ptr = &ComputeSigmaR::Xrpdty_NLO_projectileY;
             cout << "# Using projectile Y evolution rapidity" << endl;
             // cov_to_eta_x calls rho_shift

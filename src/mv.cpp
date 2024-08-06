@@ -61,7 +61,7 @@ cout << r<< " " << res << endl;
 		* std::log( 1.0/(r*lambdaqcd) + ec*e);
 	if (exponent < 1e-5) return exponent;
 	else return 1.0 - std::exp(-exponent);
-
+}
 
 
 void MV::SetQsqr(double qsqr)

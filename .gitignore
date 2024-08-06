@@ -37,3 +37,9 @@ out/
 out-mass/
 fits/
 errors/
+
+# Ignore slurm outputs and scripts
+*.out
+
+# Ignore sigmas
+xsecs/
