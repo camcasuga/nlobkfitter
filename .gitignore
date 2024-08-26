@@ -43,3 +43,6 @@ errors/
 
 # Ignore sigmas
 xsecs/
+bks/
+*.sh
+hq-server*/

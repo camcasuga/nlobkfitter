@@ -432,7 +432,10 @@ double NLODISFitter::operator()(const std::vector<double>& par) const
     solver.SetX0(icx0_bk);
     solver.SetICX0_nlo_impfac(icx0_nlo_impfac);
     solver.SetICTypicalPartonVirtualityQ0sqr(icTypicalPartonVirtualityQ0sqr);
-    //solver.SetTmpOutput("tmp_datafile.dat");
+    string tmpoutput = "bks/tmp_datafile_";
+    tmpoutput += std::to_string(qs0sqr);
+    tmpoutput += ".dat";
+    //solver.SetTmpOutput(tmpoutput);
     solver.Solve(maxy);
 
     // solver.GetDipole()->Save("output_dipole_uksi_balsd_heraII.dat");
