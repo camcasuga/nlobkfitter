@@ -392,7 +392,7 @@ double NLODISFitter::operator()(const std::vector<double>& par) const
     }
     if (qs0sqr < 0.0001 or qs0sqr > 100 or alphas_scaling < 0.01 or alphas_scaling > 99999
         /*or fitsigma0 < 0.1 or fitsigma0 > 999 */
-        or e_c < 1)
+        or e_c < 0.5)
     return 9999999;
 
     cout << "=== Initializing Chi^2 regression === "<< " parameters (" << PrintVector(par) << ")" << endl;
