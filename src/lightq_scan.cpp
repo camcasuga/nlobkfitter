@@ -248,7 +248,8 @@ int main( int argc, char* argv[] )
 	parameters.Add("qs0sqr",		        Qcalc);
     // parameters.Add("fitsigma0",		        1.0); // 1mb = 2.568 GeV²
     parameters.Add("alphascalingC2",	    Ccalc);
-    parameters.Add("e_c",                   ic_ec );
+    parameters.Add("p",                   ic_ec );
+    //parameters.Add("p",                     ic_p);
     parameters.Add("anomalous_dimension",   icgamma );
     parameters.Add("icx0_nlo_impfac",       icx0_if );
     parameters.Add("icx0_bk",               icx0_bk );

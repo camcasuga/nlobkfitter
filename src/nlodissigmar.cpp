@@ -435,7 +435,7 @@ double NLODISFitter::operator()(const std::vector<double>& par) const
     string tmpoutput = "bks/tmp_datafile_";
     tmpoutput += std::to_string(qs0sqr);
     tmpoutput += ".dat";
-    //solver.SetTmpOutput(tmpoutput);
+    /// solver.SetTmpOutput(tmpoutput);
     solver.Solve(maxy);
 
     // solver.GetDipole()->Save("output_dipole_uksi_balsd_heraII.dat");
