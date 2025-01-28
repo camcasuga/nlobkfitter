@@ -648,7 +648,7 @@ double BKSolver::Kernel_lo(double r, double z, double theta)
     }
     
     double dlog = 1.0;
-    if (config::DOUBLELOG_LO_KERNEL == false or config::RESUM_DLOG == true )
+    if (config::DOUBLELOG_LO_KERNEL == false or config::RESUM_DLOG == true or config::KINEMATICAL_CONSTRAINT == config::KC_BEUF_K_PLUS)
         dlog=0.0;
     
     
@@ -715,9 +715,26 @@ double BKSolver::Kernel_lo(double r, double z, double theta)
         cerr << "Note: Kernel_lo()=" << result << ", with r=" << r <<", X=" << X << ", Y=" << Y << ", returning 0..." << endl;
         return 0;
     }
+
+    double lo_kernel = Alphas(alphas_scale)*NC/(2.0*M_PI*M_PI) * SQR( r / (X*Y)); // lo kernel with parent/smallest dipole
+    double k1fin = lo_kernel * Alphas(alphas_scale) * NC / (4.0*M_PI)
+    * (
+       67.0/9.0 - SQR(M_PI)/3.0 - 10.0/9.0 * NF/NC
+       - dlog*2.0 * 2.0*std::log( X/r ) * 2.0*std::log( Y/r )
+       );
+
+    if (KINEMATICAL_CONSTRAINT == config::KC_BEUF_K_PLUS and config::NO_K2 == false) // KCBK + NLO corrections to BK
+    {
+        if (RESUM_DLOG == true or RESUM_SINGLE_LOG == true)
+        {
+            cerr << "Kinematical constraint should not be use with double log resummation, single log resummation might be ok... " << LINEINFO << endl;
+            exit(1);
+        }
+        return result + k1fin; // No subtraction term as we don't include the single log resummation
+    }
     
     
-    if (RESUM_DLOG == false and RESUM_SINGLE_LOG==false)
+    if (RESUM_DLOG == false and RESUM_SINGLE_LOG==false) 
     {
         return result;
     }
@@ -727,18 +744,14 @@ double BKSolver::Kernel_lo(double r, double z, double theta)
         return resum*singlelog_resum*result;
     }
     
-    double lo_kernel = Alphas(alphas_scale)*NC/(2.0*M_PI*M_PI) * SQR( r / (X*Y)); // lo kernel with parent/smallest dipole
+    
     double subtract = 0;
     if (config::RESUM_RC != RESUM_RC_BALITSKY)
         subtract = lo_kernel * singlelog_resum_expansion;
     else    // Balitsky
         subtract = result * singlelog_resum_expansion;
     
-    double k1fin = lo_kernel * Alphas(alphas_scale) * NC / (4.0*M_PI)
-    * (
-       67.0/9.0 - SQR(M_PI)/3.0 - 10.0/9.0 * NF/NC
-       - dlog*2.0 * 2.0*std::log( X/r ) * 2.0*std::log( Y/r )
-       );
+    
     
     result = resum*singlelog_resum*result
         - subtract   // remove as^2 part of single log resummation
