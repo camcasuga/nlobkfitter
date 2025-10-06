@@ -56,7 +56,7 @@ int main()
     config::RPOINTS = 100;
 
     // Constants
-    config::NF=3;   // Only light quarks
+    config::NF= 3;//3;   // Only light quarks
     config::LAMBDAQCD = 0.241;
 
     // ***Solve resummed BK***

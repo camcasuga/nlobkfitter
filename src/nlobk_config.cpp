@@ -15,22 +15,22 @@ using namespace config;
 // Default configs
 namespace config
 {
-     bool VERBOSE = false;
+     bool VERBOSE = true;
 
      double NC=3;
      double NF=3;
 
      double LAMBDAQCD = 0.241;
 
-     int RINTPOINTS=85;
+     int RINTPOINTS= 85;
      int THETAINTPOINTS = 85;
      double INTACCURACY=0.005;
      double MCINTACCURACY = 0.2;
      double MAXR = 10;          // Quite small, only for testing
-     double MINR=1e-6;
-     unsigned int RPOINTS = 170;
+     double MINR= 1e-5;//1e-6;
+     unsigned int RPOINTS = 170; //170
 
-     size_t MCINTPOINTS = 1e7;
+     size_t MCINTPOINTS = 1e6;
 
      double DE_SOLVER_STEP = 0.2; // 0.05 paperissa
 
@@ -44,7 +44,7 @@ namespace config
      bool DOUBLELOG_LO_KERNEL = false; // include double log term from the LO kernel
      bool ONLY_DOUBLELOG = false;
 
-     INTEGRATION_METHOD INTMETHOD_NLO = MISER;
+     INTEGRATION_METHOD INTMETHOD_NLO = VEGAS;
 
      bool FORCE_POSITIVE_N = true;
 
@@ -89,6 +89,8 @@ std::string NLOBK_CONFIG_STRING()
     ss << " Parent dipole, explicit beta";
     else if (RC_LO == GUILLAUME_LO)
     ss << " Guillaume RC (arXiv:1708.06557)";
+    else if (RC_LO == FRAC_LO)
+    ss << " Fastest apparent convergence";
     else
     ss << " NO STRING IMPLEMENTED!";
     

@@ -22,7 +22,7 @@
 #include <gsl/gsl_errno.h>
 
 // Integration constants
-const double eps = 1e-30;
+const double eps = 1e-20;
 using namespace config;
 //using std::isinf;
 //using std::isnan;
@@ -84,11 +84,12 @@ int BKSolver::Solve(double maxy)
     // Intialize GSL
     DEHelper help; help.solver=this;
     gsl_odeiv_system sys = {Evolve, NULL, vecsize, &help};
-    
+
     const gsl_odeiv_step_type * T = gsl_odeiv_step_rk2; // rkf45 is more accurate
+    //gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new(&sys, T, step, 0.00001, 1e-5); // for fixed
     gsl_odeiv_step * s    = gsl_odeiv_step_alloc (T, vecsize);
-    gsl_odeiv_control * c = gsl_odeiv_control_y_new (0.00001, 1e-5);    //abserr relerr  
-    // Note: absolute uncertainty tolerance here is quite large for the small-r region, but it is in practice needed
+    gsl_odeiv_control * c = gsl_odeiv_control_y_new (0.0001, 1e-4);    //abserr relerr  
+    // // Note: absolute uncertainty tolerance here is quite large for the small-r region, but it is in practice needed
     // if the initial condition has a large anomalous dimension: in that case there seems to be quite a fast evolution
     // especially in the region where the dipole is approx. 0
     // Use should check that final results are not sensitive to this parameter!
@@ -116,6 +117,22 @@ int BKSolver::Solve(double maxy)
                     cout << "\r" << "# Evolved up to " << y << "/" << maxy << ", h=" << h << std::flush;
                 }
             }
+
+            // for (i = 0; i < vecsize; i++)
+            // {
+            //     int status = gsl_odeiv2_driver_apply_fixed_step(d, &y, h, 1000 , ampvec );
+            //             if (status != GSL_SUCCESS) {
+            //                 cerr << "Error in gsl_odeiv_evolve_apply at " << LINEINFO
+            //                 << ": " << gsl_strerror(status) << " (" << status << ")"
+            //                 << " y=" << y << ", h=" << h << endl;
+            //             }
+            //             //if (std::abs(y - (int)(y+0.5))<0.01)
+            //             if(VERBOSE)
+            //             {
+            //                 cout << "\r                                                   " << std::flush;
+            //                 cout << "\r" << "# Evolved up to " << y << "/" << maxy << ", h=" << h << std::flush;
+            //             }
+            // }
             
             // Check ampvec
             for (int i=0; i<vecsize; i++)
@@ -586,6 +603,18 @@ double BKSolver::Kernel_lo(double r, double z, double theta)
            );
         alphas_scale = r;
     }
+
+    // else if (RC_LO == FAC_LO  )
+    // {
+    //     double alphas_y_bar = Alphas(Y) * Nc / M_PI;
+    //     double alphas_x_bar = Alphas(X) * Nc / M_PI;
+    //     double alphas_r_bar = Alphas(r) * Nc / M_PI;
+    //     result =
+    //     ;
+    //     alphas_scale = r;
+    // }
+
+
     else if (RC_LO == SMALLEST_LO)
     {
         result = NC*Alphas(min) / (2.0*SQR(M_PI))*SQR(r/(X*Y));
@@ -868,7 +897,7 @@ double BKSolver::RapidityDerivative_nlo(double r, Interpolator* dipole_interp, I
                 gsl_monte_vegas_integrate (&fun, min, max, dim, calls, rnd, s,
                                            &result, &abserr);
 #pragma omp critical
-                cout << "#Result(r=" << r <<") " << result << " err " << abserr << " relchange " << (result-prevres)/prevres << " chi^2 " << gsl_monte_vegas_chisq (s) << endl;
+                //cout << "#Result(r=" << r <<") " << result << " err " << abserr << " relchange " << (result-prevres)/prevres << " chi^2 " << gsl_monte_vegas_chisq (s) << endl;
                 prevres=result;
                 iters++;
             }
@@ -877,11 +906,11 @@ double BKSolver::RapidityDerivative_nlo(double r, Interpolator* dipole_interp, I
             //#pragma omp critical
             if (iters>=maxiter_vegas)
             {
-                cout <<"# Integration failed at r=" << r <<", result->0, bestresult "<< result << " relerr " << abserr/result << " chi^2 "  << gsl_monte_vegas_chisq (s) << endl;
-                result=0;
+                //cout <<"# Integration failed at r=" << r <<", result->0, bestresult "<< result << " relerr " << abserr/result << " chi^2 "  << gsl_monte_vegas_chisq (s) << endl;
+                //result=0;
             }
             //else
-            //    cout << "Integration finished, r=" << r<< ", result " << result << " relerr " << abserr/result << " chi^2 "  << gsl_monte_vegas_chisq (s) << " (intpoints " << calls << ")" << endl;
+                //cout << "Integration finished, r=" << r<< ", result " << result << " relerr " << abserr/result << " chi^2 "  << gsl_monte_vegas_chisq (s) << " (intpoints " << calls << ")" << endl;
             gsl_monte_vegas_free(s);
             
         }
@@ -1042,7 +1071,24 @@ double Inthelperf_nlo(double r, double z, double theta_z, double z2, double thet
     double k = solver->Kernel_nlo(r,X,Y,X2,Y2,z_m_z2);
     double kswap = solver->Kernel_nlo(r,X2,Y2,X,Y,z_m_z2);
     
-    
+    if (X < eps or Y < eps or X2 < eps or Y2 < eps or z_m_z2 < eps)
+    {
+        // cout << "Ding! Some of the dipole sizes are too small! "
+        //      << "r=" << r << ", X=" << X << ", Y=" << Y << ", X2=" << X2 << ", Y2=" << Y2 << endl;
+        return 0;
+    }
+
+    if ( r*r + z*z - 2.0*r*z*std::cos(theta_z)<0 or r*r + z2*z2 - 2.0*r*z2*std::cos(theta_z2)  < 0 or z*z + z2*z2 - 2.0*z*z2*std::cos(theta_z - theta_z2) < 0  )
+    {
+        // cout << "Ding! Some of the dipole sizes are negative! "
+        //      << "r=" << r << ", z=" << z << ", theta_z=" << theta_z
+        //      << ", z2=" << z2 << ", theta_z2=" << theta_z2
+        //      << ", X=" << X << ", Y=" << Y
+        //      << ", X2=" << X2 << ", Y2=" << Y2
+        //      << ", z-z2=" << z_m_z2
+        //      << endl;
+        return 0;
+    }
     
     
     /*
@@ -1118,15 +1164,14 @@ double Inthelperf_nlo(double r, double z, double theta_z, double z2, double thet
         cerr << "Unknown NLO kernel alphas! " << LINEINFO << endl;
         return -1;
     }
-        
-    
-    
-    
+
     
     if (std::isnan(result) or std::isinf(result))
     {
+        cout << "Ding! Result is NaN or Inf :(" << endl;  
         return 0;
     }
+    
     
     return result;
     

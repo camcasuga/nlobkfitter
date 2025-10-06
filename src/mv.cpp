@@ -11,29 +11,33 @@ using std::cerr; using std::endl;
 
 double MV::DipoleAmplitude(double r, double b)
 {
-/*
- * cerr << "Note: MVgamma model is modified!!!" << endl;
+
+//  * cerr << "Note: MVgamma model is modified!!!" << endl;
+	if (b>1e-10)
+		cerr << "Impact parameter is not supported!" << LINEINFO << endl;
+	if (r < 1e-30)
+		return 0;
 
 	// rcmv from 1507.03651
 	BKSolver solver;	// Becaus Alpha_s is defined there
 
 	// GBW
-	double q0sqr=0.460*0.460;
-	double p=1.148;
-	double n = 1.0 - std::exp(-std::pow(r*r*q0sqr/4.0,p));
-	if (n<0) return 0;
-	if (n>1) return 1;
-	return std::pow(n, 1.0/p);
-*/
-	/*
+	// double q0sqr=0.460*0.460;
+	// double p=1.148;
+	// double n = 1.0 - std::exp(-std::pow(r*r*q0sqr/4.0,p));
+	// if (n<0) return 0;
+	// if (n>1) return 1;
+	// return std::pow(n, 1.0/p);
+
+	
 	double asat = solver.Alphas(9999999)*config::NC/M_PI;
 	double as = solver.Alphas(r)*config::NC/M_PI;
-	const double p = 0.541;
-	const double q0sqr =0.621*0.621;
-	double res = 1.0 - std::exp(
-		-std::pow(  r*r*q0sqr/4.0 * as *( 1.0 + std::log( asat / as ) ), p));
- 	return std::pow(res, 1.0/p);
-	*/
+	// const double p = 0.541;
+	// const double q0sqr =0.621*0.621;
+	double res = 1.0 - std::exp(-std::pow(  r*r*qs0sqr/4.0 * as *( 1.0 + std::log( asat / as ) ), anomalous_dimension));
+	
+	return std::pow(res, 1.0/anomalous_dimension); // note by Carlisle: I replace p with the anomalous_dimension argument
+	
 	/*
 	// glauberized rcmv
 	double sigma0=28.7977*2.568;
@@ -52,17 +56,17 @@ double MV::DipoleAmplitude(double r, double b)
 cout << r<< " " << res << endl;
 	return res;
 	*/
-	if (b>1e-10)
-		cerr << "Impact parameter is not supported!" << LINEINFO << endl;
-	if (r < 1e-30)
-		return 0;
-	const double e = 2.7182818;
-	//double exponent = std::pow(SQR(r)*qs0sqr, anomalous_dimension)/4.0
-	//	* std::log( 1.0/(r*lambdaqcd) + ec*e);
-	double exponent = std::pow(SQR(r)*qs0sqr, anomalous_dimension)/4.0
-		* std::log( 1.0/(r*lambdaqcd) + e);
-	if (exponent < 1e-5) return exponent;
-	else return std::pow(1.0 - std::exp(-std::pow(exponent, ec)), 1./ec);
+
+
+	// MV gamma/e initial condition
+	// const double e = 2.7182818;
+	// double exponent = std::pow(SQR(r)*qs0sqr, anomalous_dimension)/4.0
+	// 	* std::log( 1.0/(r*lambdaqcd) + ec*e);
+	// // double exponent = std::pow(SQR(r)*qs0sqr, anomalous_dimension)/4.0
+	// // 	* std::log( 1.0/(r*lambdaqcd) + e);
+	// if (exponent < 1e-5) return exponent;
+	// else return 1.0 - std::exp(-exponent);
+	// else return std::pow(1.0 - std::exp(-std::pow(exponent, ec)), 1./ec);
 }
 
 

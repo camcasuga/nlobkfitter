@@ -435,7 +435,7 @@ double NLODISFitter::operator()(const std::vector<double>& par) const
     string tmpoutput = "bks/tmp_datafile_";
     tmpoutput += std::to_string(qs0sqr);
     tmpoutput += ".dat";
-    /// solver.SetTmpOutput(tmpoutput);
+    solver.SetTmpOutput(tmpoutput);
     solver.Solve(maxy);
 
     // solver.GetDipole()->Save("output_dipole_uksi_balsd_heraII.dat");
@@ -481,7 +481,8 @@ double NLODISFitter::operator()(const std::vector<double>& par) const
     double fitsigma0 = 1;
     std::vector<double> datavals(totalpoints);
     std::vector<double> dataerrs(totalpoints);
-    std::vector<double> thdata(totalpoints);  
+    std::vector<double> thdata(totalpoints);
+    std::vector<double> thdata_c(totalpoints);
     std::vector<double> var_xbj(totalpoints);
     std::vector<double> var_y(totalpoints);
     std::vector<double> var_qsqr(totalpoints);
@@ -566,8 +567,9 @@ double NLODISFitter::operator()(const std::vector<double>& par) const
                         } else if (nlodis_config::MASS_SCHEME == nlodis_config::BEAUTY_ONLY){
                             theory = (fitsigma0)*SigmaComputer.SigmarNLOunsub_massive(Q , xbj , y, qMass_b_var );
                         } else if (nlodis_config::MASS_SCHEME == nlodis_config::LIGHT_PLUS_CHARM){
+                            theory_charm = (fitsigma0)*SigmaComputer.SigmarNLOunsub_massive(Q , xbj , y, qMass_charm );
                             theory = (fitsigma0)*SigmaComputer.SigmarNLOunsub(Q , xbj , y )
-                                     + (fitsigma0)*SigmaComputer.SigmarNLOunsub_massive(Q , xbj , y, qMass_charm );
+                                     + theory_charm;
                         } else if (nlodis_config::MASS_SCHEME == nlodis_config::LIGHT_PLUS_CHARM_AND_BEAUTY){
                             theory = (fitsigma0)*SigmaComputer.SigmarNLOunsub(Q , xbj , y )
                                      + (fitsigma0)*SigmaComputer.SigmarNLOunsub_massive(Q , xbj , y, qMass_charm )
@@ -605,6 +607,7 @@ double NLODISFitter::operator()(const std::vector<double>& par) const
             }
             
             thdata[dataind] = theory;
+            thdata_c[dataind] = theory_charm;
 
 
             if (calccount>1)
@@ -631,7 +634,7 @@ double NLODISFitter::operator()(const std::vector<double>& par) const
     double chisqr_over_n = sigma02fit[1];
     double sigma02 = sigma02fit[0];
     // comparing to old sigma02
-    double old_chisq_over_n = minimiser_helper_chisqr_vec(old_sigma02, datavals, dataerrs, thdata);
+    //double old_chisq_over_n = minimiser_helper_chisqr_vec(old_sigma02, datavals, dataerrs, thdata);
     // Output for plotting
     cout << " ## var_xbj, var_qsqr, var_y, sigmar, sigmar_err, sigma02xthdata " << endl;
     if(nlodis_config::PRINTDATA){
@@ -642,9 +645,8 @@ double NLODISFitter::operator()(const std::vector<double>& par) const
                 << setw(10) << var_y[i]        << " "
                 << setw(10) << datavals[i]     << " "
                 << setw(10) << dataerrs[i]     << " "
-                << setw(10) << old_sigma02*thdata[i] /* << " "
-                << setw(10) << sigma02*theory_charm <<*/ 
-                << endl;
+                << setw(10) << old_sigma02*thdata[i] << " "
+                << setw(10) << old_sigma02*thdata_c[i] << endl;
             }
     }
     cout << " ## sigma r data ends here " << endl;    
@@ -654,12 +656,12 @@ double NLODISFitter::operator()(const std::vector<double>& par) const
     //         << "), parameters (" << PrintVector(par)
     //         << ", sigma02=" << sigma02
     //         << ")" << endl<<endl;
-    cout    << endl
-            << "# Calculated chi^2/N = " << old_chisq_over_n
-            << " (N=" << points
-            << "), parameters (" << PrintVector(par)
-            << ", sigma02=" << old_sigma02
-            << ")" << endl<<endl;
+    // cout    << endl
+    //         << "# Calculated chi^2/N = " << old_chisq_over_n
+    //         << " (N=" << points
+    //         << "), parameters (" << PrintVector(par)
+    //         << ", sigma02=" << old_sigma02
+    //         << ")" << endl<<endl;
     
 
     // delete DipolePointer;

@@ -77,17 +77,17 @@ int main( int argc, char* argv[] )
     string cubaMethod = "vegas";
     // string cubaMethod = "suave";
 
-    config::NO_K2 = true;  // Do not include numerically demanding full NLO part
+    config::NO_K2 = false;  // Do not include numerically demanding full NLO part
     config::KINEMATICAL_CONSTRAINT = config::KC_NONE;
 
     config::VERBOSE = true;
     //config::RINTPOINTS = 512/4;
     //config::THETAINTPOINTS = 512/4;
 
-    config::INTACCURACY = 5e-3;//0.02;
+    // config::INTACCURACY = 5e-3;//0.02;
     // config::INTACCURACY = 5e-3; // highacc def1
-    // config::INTACCURACY = 20e-3; // quick low acc
-    config::MINR = 1e-6;
+    config::INTACCURACY = 20e-3; // quick low acc
+    config::MINR = 1e-5;
     config::MAXR = 30;
     // config::MINR = 1e-4;  // faster lower accuracy limits
     // config::MAXR = 20;
@@ -168,6 +168,8 @@ int main( int argc, char* argv[] )
     if (nlodis_config::MASS_SCHEME == nlodis_config::CHARM_ONLY){
         // data.LoadData("./data/hera_combined_sigmar_cc.txt", TOTAL); // old charm data
         data.LoadData("./data/hera_II_combined_sigmar_cc.txt", TOTAL); // newer charm data
+    } else if (nlodis_config::MASS_SCHEME == nlodis_config::LIGHT_PLUS_CHARM){
+        data.LoadData("./data/hera_II_combined_sigmar_total_and_cc.txt", TOTAL);
     } else if (nlodis_config::MASS_SCHEME == nlodis_config::BEAUTY_ONLY){
         data.LoadData("./data/hera_II_combined_sigmar_b.txt", TOTAL); // newer bottom data
     } else {
@@ -181,7 +183,7 @@ int main( int argc, char* argv[] )
             config::RESUM_DLOG = true;       // Resum doulbe logs
             config::RESUM_SINGLE_LOG = true; // Resum single logs
             config::KSUB = 0.65;             // Optimal value for K_sub
-            config::NO_K2 = true;            // Do not include numerically demanding full NLO part
+            config::NO_K2 = false;            // Do not include numerically demanding full NLO part
             nlodis_config::SUB_TERM_KERNEL = nlodis_config::SUBTERM_RESUM;
     }else if (string(argv [2]) == "kcbk"){
             config::EULER_METHOD = true;     // Kinematical constraint requires this
@@ -246,7 +248,13 @@ int main( int argc, char* argv[] )
             config::RC_NLO = config::SMALLEST_NLO;
             config::RESUM_RC = config::RESUM_RC_SMALLEST;
             nlodis_config::RC_DIS = nlodis_config::DIS_RC_SMALLEST;
-    }else {cout << helpstring << endl; return -1;}
+    } else if (string(argv [3]) == "fracrc" or string(argv [3]) == "frc"){
+            config::RC_LO = config::FRAC_LO;
+            config::RC_NLO = config::SMALLEST_NLO;
+            config::RESUM_RC = config::RESUM_RC_SMALLEST;
+            nlodis_config::RC_DIS = nlodis_config::DIS_RC_SMALLEST;
+
+    } else {cout << helpstring << endl; return -1;}
 
     if (string(argv [4]) == "z2improved" or string(argv [4]) == "z2imp"){
         nlodis_config::Z2MINIMUM = nlodis_config::Z2IMPROVED;
