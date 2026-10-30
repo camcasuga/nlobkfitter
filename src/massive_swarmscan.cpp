@@ -88,10 +88,10 @@ int main( int argc, char* argv[] )
     // config::INTACCURACY = 5e-3; // highacc def1
     config::INTACCURACY = 20e-3; // quick low acc
     config::MINR = 1e-5;
-    config::MAXR = 30;
+    config::MAXR = 100;
     // config::MINR = 1e-4;  // faster lower accuracy limits
     // config::MAXR = 20;
-    config::RPOINTS = 100;
+    config::RPOINTS = 10; //150;
     config::DE_SOLVER_STEP = 0.4; // Rungekutta step
 
     // Constants
@@ -100,8 +100,8 @@ int main( int argc, char* argv[] )
 
 
     Data data;
-    data.SetMinQsqr(0.75);
-    data.SetMaxQsqr(50);
+    data.SetMinQsqr(40);
+    data.SetMaxQsqr(200);
     data.SetMaxX(0.01);
 
 
@@ -152,6 +152,7 @@ int main( int argc, char* argv[] )
         useSUB = false;
         useSigma3 = false;
         nlodis_config::MASS_SCHEME = nlodis_config::LIGHT_PLUS_CHARM;
+        nlodis_config::PERF_MODE = nlodis_config::MASSIVE_EXPLICIT_BESSEL_DIM_REDUCTION;
     } else if (string(argv [1]) == "unlpcb"){
         nlodis_config::SUB_SCHEME = nlodis_config::UNSUBTRACTED;
         useSUB = false;

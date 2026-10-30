@@ -66,7 +66,13 @@ double ComputeSigmaR::SigmarNLOunsub ( double Q , double xbj, double y) {
     double FT = FTic + FTdip + FTqg;
     double F2 = FL+FT;
     double fy = Sq(y)/(1+Sq(1-y));
-    double sigma = F2 - fy*FL;
+    double sigma = F2- fy*FL;
+    // double F2ic = FLic + FTic;
+    // double F2dip = FLdip + FTdip;
+    // double F2qg = FLqg + FTqg;
+    // double sigmaic = F2ic - fy*FLdip ;
+    // double sigmadip = F2dip - fy*FLdip;
+    // double sigmaqg = F2qg - fy*FL2qg;
     // Printing intermediate F2 FL FT
     // cout << "SigmarNLOunsub(Q xbj y) sigmar F2 FL FT "  << Q << " "
     //                                                     << xbj << " "
@@ -88,10 +94,11 @@ double ComputeSigmaR::SigmarNLOunsub_massive ( double Q , double xbj, double y, 
     double FL = FLic + FLdip + FLqg;
     double FT = FTic + FTdip + FTqg;
     double F2 = FL+FT;
+    double Fic = FLic + FTic;
     double fy = Sq(y)/(1+Sq(1-y));
-    double sigma = F2 - fy*FL;
+    double sigma = F2- fy*FL;
 
-    // Printing intermediate F2 FL FT
+    // // Printing intermediate F2 FL FT
     // cout << "SigmarNLOunsub_massive(Q xbj y mf) sigmar F2 FL FT "  << Q << " "
     //                                                                 << xbj << " "
     //                                                                 << y << " "
@@ -196,6 +203,7 @@ double ComputeSigmaR::SigmarNLOsubRisto ( double Q , double xbj, double y) {
 double ComputeSigmaR::Structf_LLO ( double Q , double xbj ) {
     double fac = structurefunfac*Sq(Q);
     double FL = fac*LLOp( Q , xbj );
+    //cout << "FL" << FL << " for Q =" << Q << "and x ="  << xbj << endl;
     return FL;
 }
 
@@ -433,7 +441,7 @@ double NLODISFitter::operator()(const std::vector<double>& par) const
     solver.SetICX0_nlo_impfac(icx0_nlo_impfac);
     solver.SetICTypicalPartonVirtualityQ0sqr(icTypicalPartonVirtualityQ0sqr);
     string tmpoutput = "bks/tmp_datafile_";
-    tmpoutput += std::to_string(qs0sqr);
+    tmpoutput += std::to_string(mass_charm);
     tmpoutput += ".dat";
     solver.SetTmpOutput(tmpoutput);
     solver.Solve(maxy);
@@ -442,10 +450,12 @@ double NLODISFitter::operator()(const std::vector<double>& par) const
     // solver.GetDipole()->Save("output_dipole_urpbsi_hera_resumpd_ic_nlobk.dat");
     //solver.GetDipole()->Save("output_dipole_lobk_x0=10_euler_KINCOST_DESTEP0.08.dat");
     //solver.GetDipole()->Save("output_dipole_lobk_x0=10_rungekutta_DESTEP0.4.dat");
-    // AmplitudeLib* DipoleAmplitude_ptr; // Forward declaration of the dipole object to be initialized from a file or solved data.
-    // DipoleAmplitude_ptr = new AmplitudeLib("output_dipole_uksi_balsd_heraII.dat");      // read data from existing file.
-    // AmplitudeLib DipoleAmplitude(*DipoleAmplitude_ptr);
 
+    // AmplitudeLib* DipoleAmplitude_ptr; // Forward declaration of the dipole object to be initialized from a file or solved data.
+    // DipoleAmplitude_ptr = new AmplitudeLib("bks/median_bk.dat");      // read data from existing file.
+    // AmplitudeLib DipoleAmplitude(*DipoleAmplitude_ptr);
+    //cout << "=== Reading BK ===" << endl;
+    
     
     // Give solution to the AmplitudeLib object
     AmplitudeLib DipoleAmplitude(solver.GetDipole()->GetData(), solver.GetDipole()->GetYvals(), solver.GetDipole()->GetRvals());
@@ -468,6 +478,17 @@ double NLODISFitter::operator()(const std::vector<double>& par) const
 
     // CUBA Monte Carlo integration library algorithm setter
     SigmaComputer.SetCubaMethod(cubaMethod);
+
+    // cout <<"y,r,S(r)" << endl;
+    // for (double r=1e-6; r<100; r*=1.05)
+    // {
+    //     for (double y=0; y < maxy; y+=0.1)
+    //     {
+    //             double amp = DipoleAmplitude.S(r, std::exp(-y));
+    //             cout << y << ","<<r<<","<<amp <<endl;
+    //     }
+    // }
+    // exit(1);
 
     cout << "=== Computing Reduced Cross sections ===" << endl;
 
@@ -526,7 +547,7 @@ double NLODISFitter::operator()(const std::vector<double>& par) const
             var_y[dataind] = y;
             var_qsqr[dataind] = Q2;
 
-            double theory=0, theory_charm=0;
+            double theory=0, theory_charm=0; 
             int calccount=0;
             if (!computeNLO && !useMasses) // Compute reduced cross section using leading order impact factors
             {
@@ -569,7 +590,7 @@ double NLODISFitter::operator()(const std::vector<double>& par) const
                         } else if (nlodis_config::MASS_SCHEME == nlodis_config::LIGHT_PLUS_CHARM){
                             theory_charm = (fitsigma0)*SigmaComputer.SigmarNLOunsub_massive(Q , xbj , y, qMass_charm );
                             theory = (fitsigma0)*SigmaComputer.SigmarNLOunsub(Q , xbj , y )
-                                     + theory_charm;
+                                     + theory_charm;                       
                         } else if (nlodis_config::MASS_SCHEME == nlodis_config::LIGHT_PLUS_CHARM_AND_BEAUTY){
                             theory = (fitsigma0)*SigmaComputer.SigmarNLOunsub(Q , xbj , y )
                                      + (fitsigma0)*SigmaComputer.SigmarNLOunsub_massive(Q , xbj , y, qMass_charm )
@@ -629,6 +650,8 @@ double NLODISFitter::operator()(const std::vector<double>& par) const
         }
     }
     cout << endl;
+
+
     // Minimize sigma02
     std::vector<double> sigma02fit = FindOptimalSigma02(datavals,dataerrs, thdata);
     double chisqr_over_n = sigma02fit[1];
@@ -993,6 +1016,9 @@ double ComputeSigmaR::alpha_bar_QG_running_smallest( void *userdata ) { // alpha
     double AlphaSres = 4.0*M_PI / ( b0 * std::log(
     std::pow( std::pow(alphas_mu0, 2.0/alphas_freeze_c) + std::pow(scalefactor/(r_min_sqr*lambdaqcd*lambdaqcd), 1.0/alphas_freeze_c), alphas_freeze_c)
     ) );
+
+    // cout << "x01sq = " << x01sq << " x02sq = " << x02sq << " x21sq = " << x21sq << " b0 = " << b0 <<  " Nc/M_PI * AlpahaSres = " << Nc/M_PI*AlphaSres << endl;
+
   return Nc/M_PI*AlphaSres;
 }
 
@@ -2291,7 +2317,8 @@ int integrand_ILqgunsub_massive_I3(const int *ndim, const double x[], const int 
 
     double tripole_term = SKernel_tripole * ILNLOqg_massive_tripole_part_I3(Q,mf,z1,z2,x01sq,x02sq,x21sq,y_t1,y_u1,y_t2,y_u2); // Terms proportional to N_012
     // double tripole_term = SKernel_tripole * ILNLOqg_massive_tripole_part_I3_fast(Q,mf,z1,z2,x01sq,x02sq,x21sq,y_t1,y_t2); // Terms proportional to N_012
-
+    // cout << "integrand_ILqgunsub_massive_I3: x01 ="  << x01 << "; x02 =" << x02 << "; x21 sq =" << x21sq << endl;
+    // cout << "alphabar" << alphabar << endl;
     double res =   jac*alphfac*( tripole_term )/z2*x01*x02;
 
     if(gsl_finite(res)==1){
@@ -2343,6 +2370,9 @@ int integrand_ILqgunsub_massive_I3_fast(const int *ndim, const double x[], const
     double tripole_term = SKernel_tripole * ILNLOqg_massive_tripole_part_I3_fast(Q,mf,z1,z2,x01sq,x02sq,x21sq,y_t1,y_t2); // Terms proportional to N_012
 
     double res =   jac*alphfac*( tripole_term )/z2*x01*x02;
+
+    // cout << "integrand_ILqgunsub_massive_I3_fast: x01 ="  << x01 << "; x02 =" << x02 << "; x21 sq =" << x21sq << endl;
+    // cout << "alphabar" << alphabar << endl;
 
     if(gsl_finite(res)==1){
         *f=res;
@@ -2920,6 +2950,7 @@ double ComputeSigmaR::TNLOsigma3(double Q, double x) {
     userdata.ComputerPtr=this;
     Cuba(cubamethod,ndim,integrand_ITsigma3,&userdata,&integral,&error,&prob);
     return fac*2.0*M_PI*nlodis_config::MAXR*nlodis_config::MAXR*integral;
+    cout << "HELLO I'M HERE, TNLOsigma3" << endl;
 }
 
 double ComputeSigmaR::TNLOqgsub(double Q, double x) {

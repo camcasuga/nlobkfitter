@@ -14,7 +14,7 @@ namespace nlodis_config
     bool VERBOSE = false;
     bool PRINTDATA = false;
 
-    double MAXR=50;
+    double MAXR=50; // 50 for old MV runs
     double MINR=1e-6;
 
     bool USE_MASSES = false;

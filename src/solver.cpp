@@ -60,7 +60,7 @@ int BKSolver::Solve(double maxy)
      */
     
     cout <<"#### Solving BK equation up to y=" << maxy << endl;
-    //cout << "# Nc=" << NC << ", Nf=" << NF << " alphas(r=1) = " << Alphas(1) << endl;
+    cout << "# Nc=" << NC << ", Nf=" << NF << " alphas(r=1) = " << Alphas(1) << endl;
     
     // First check that configs make sense
     if (config::RESUM_DLOG and config::KINEMATICAL_CONSTRAINT != config::KC_NONE)
@@ -88,7 +88,7 @@ int BKSolver::Solve(double maxy)
     const gsl_odeiv_step_type * T = gsl_odeiv_step_rk2; // rkf45 is more accurate
     //gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new(&sys, T, step, 0.00001, 1e-5); // for fixed
     gsl_odeiv_step * s    = gsl_odeiv_step_alloc (T, vecsize);
-    gsl_odeiv_control * c = gsl_odeiv_control_y_new (0.0001, 1e-4);    //abserr relerr  
+    gsl_odeiv_control * c = gsl_odeiv_control_y_new (0.00001, 1e-5);    //abserr relerr  
     // // Note: absolute uncertainty tolerance here is quite large for the small-r region, but it is in practice needed
     // if the initial condition has a large anomalous dimension: in that case there seems to be quite a fast evolution
     // especially in the region where the dipole is approx. 0
@@ -632,7 +632,7 @@ double BKSolver::Kernel_lo(double r, double z, double theta)
         double asbar_x = Alphas(X)*NC/M_PI;
         double asbar_y = Alphas(Y)*NC/M_PI;
         result = 1.0/(2.0*M_PI) * std::pow(
-                                           1.0/asbar_r + (SQR(X)-SQR(Y))/SQR(r) * (asbar_x - asbar_y)/(asbar_x * asbar_y)
+                                           1.0/asbar_r + (SQR(X) - SQR(Y))/SQR(r) * (asbar_x - asbar_y)/(asbar_x * asbar_y)
                                            , -1.0);
         result = result * SQR(r / (X*Y));
         alphas_scale=r;    // this only affects K1_fin
@@ -1268,6 +1268,7 @@ double BKSolver::Alphas(double r)
         double dipolescale = 4.0*alphas_scaling/ (r*r);
         double heavyqmasses[2] = {1.3,4.5};
         double nf;
+        // cout << "using NF =" << NF << endl;
         if (dipolescale < SQR(heavyqmasses[0]))
             nf=3;
         else if (dipolescale < SQR(heavyqmasses[1]))
@@ -1298,9 +1299,18 @@ double BKSolver::Alphas(double r)
         else
             cerr << "WTF, nf=" << nf <<" at " << LINEINFO << endl;
         double scalefactor = 4.0*alphas_scaling;
+        
         if (scalefactor/(r*r*lqcd*lqcd) < 1.0) return maxalphas;
+        
         double alpha = 4.0*M_PI/(  b0 * std::log(scalefactor/ (r*r*lqcd*lqcd) ) );
-        if (alpha > maxalphas) return maxalphas; //NOTE HERE b0 definition have factor 3
+        
+        if (alpha > maxalphas) {
+            // cout << "\n alpha_s = " << maxalphas << "for nf = " << nf << endl;
+            return maxalphas;} //NOTE HERE b0 definition have factor 3
+        
+               
+        // cout << "\n alpha_s = " << alpha << "for nf = " << nf << endl;
+        
         return alpha;
         /*
          double mu0=2.5;

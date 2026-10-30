@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
 
     Data data;
     data.SetMinQsqr(0.75);
-    data.SetMaxQsqr(50);
+    data.SetMaxQsqr(800);
     data.SetMaxX(0.01); // NLO, ic at xbj=1e-1;  TODO Is this necessary?
 
     // Add datafiles, if 2nd parameter=CHARM, then this is only charmdata

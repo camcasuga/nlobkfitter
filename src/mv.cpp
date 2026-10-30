@@ -29,14 +29,18 @@ double MV::DipoleAmplitude(double r, double b)
 	// if (n>1) return 1;
 	// return std::pow(n, 1.0/p);
 
-	
-	double asat = solver.Alphas(9999999)*config::NC/M_PI;
-	double as = solver.Alphas(r)*config::NC/M_PI;
+	// just rcMV
 	// const double p = 0.541;
-	// const double q0sqr =0.621*0.621;
-	double res = 1.0 - std::exp(-std::pow(  r*r*qs0sqr/4.0 * as *( 1.0 + std::log( asat / as ) ), anomalous_dimension));
+	// const double q0sqr = 0.621*0.621;
+	// note by Carlisle: I replace p with the anomalous_dimension argument
+	// double asat = solver.Alphas(9999999) * config::NC/M_PI;
+	// double as = solver.Alphas(r) * config::NC/M_PI;
+	// double exp_arg =  r*r*qs0sqr/4.0 * as *( 1.0 + std::log( asat / as ) );
+	// double res = std::pow(1.0 -  std::exp(-std::pow(exp_arg, anomalous_dimension)), 1.0/anomalous_dimension);
+
+	// if (std::pow(exp_arg,anomalous_dimension) < 1e-5) return exp_arg;
 	
-	return std::pow(res, 1.0/anomalous_dimension); // note by Carlisle: I replace p with the anomalous_dimension argument
+	// else return res; 
 	
 	/*
 	// glauberized rcmv
@@ -59,13 +63,21 @@ cout << r<< " " << res << endl;
 
 
 	// MV gamma/e initial condition
-	// const double e = 2.7182818;
+	const double e = 2.7182818;
 	// double exponent = std::pow(SQR(r)*qs0sqr, anomalous_dimension)/4.0
 	// 	* std::log( 1.0/(r*lambdaqcd) + ec*e);
-	// // double exponent = std::pow(SQR(r)*qs0sqr, anomalous_dimension)/4.0
-	// // 	* std::log( 1.0/(r*lambdaqcd) + e);
-	// if (exponent < 1e-5) return exponent;
-	// else return 1.0 - std::exp(-exponent);
+	double exponent = std::pow(SQR(r)*qs0sqr, anomalous_dimension)/4.0
+		* std::log( 1.0/(r*lambdaqcd) + ec*e);
+	
+	if (exponent < 1e-5)
+	{
+		// cout << "\n r = " << r << " N = " << exponent;
+		return exponent;
+	}
+
+	// cout << " \n r = " << r << " N = " << 1.0 - std::exp(-exponent);
+	return 1.0 - std::exp(-exponent);
+
 	// else return std::pow(1.0 - std::exp(-std::pow(exponent, ec)), 1./ec);
 }
 

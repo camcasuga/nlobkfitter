@@ -94,7 +94,7 @@ int main( int argc, char* argv[] )
         config::DE_SOLVER_STEP = 0.2; // Rungekutta step
 
         // Constants
-        config::NF=3;   // Only light quarks
+        config::NF=4;  
         config::LAMBDAQCD = 0.241;
 
 
@@ -118,12 +118,12 @@ int main( int argc, char* argv[] )
     } else {cout << helpstring << endl; return -1;}
 
     string_bk = string(argv [2]);
-    if (string(argv [2]) == "resumbk"){
+    if (string(argv [2]) == "resumbk"){ // NLO: NO_F2 = false
             config::LO_BK = false;  // Solve LO BK with running coupling, overrides RESUM settings
             config::RESUM_DLOG = true; // Resum doulbe logs
             config::RESUM_SINGLE_LOG = true; // Resum single logs
             config::KSUB = 0.65;  // Optimal value for K_sub
-            config::NO_K2 = true;  // Do not include numerically demanding full NLO part
+            config::NO_K2 = false;  // Do not include numerically demanding full NLO part
     }else if (string(argv [2]) == "kcbk"){
             config::LO_BK = true;  // Solve (kinematic / delay) LO BK with running coupling, overrides RESUM settings
             config::EULER_METHOD            = true;        // Kinematical constraint requires this
@@ -314,7 +314,7 @@ int main( int argc, char* argv[] )
  *		- xbj[0] = 1e-3, xbj*=10^(1/4), while xbj >= 5e-7
  * 
  */
-    double Q = 1.0;
+    double Q = 4.5;
     double icx0 = initialconditionX0;
     double xbj = icx0;
 

@@ -35,7 +35,7 @@ add_executable(
 	helper.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/gitsha1.cpp
 )
-	
+
 include_directories(.)
 
 find_package(GSL REQUIRED)    #

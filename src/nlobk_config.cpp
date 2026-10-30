@@ -26,7 +26,7 @@ namespace config
      int THETAINTPOINTS = 85;
      double INTACCURACY=0.005;
      double MCINTACCURACY = 0.2;
-     double MAXR = 10;          // Quite small, only for testing
+     double MAXR = 100;          // Quite small, only for testing
      double MINR= 1e-5;//1e-6;
      unsigned int RPOINTS = 170; //170
 
